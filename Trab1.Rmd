@@ -1,0 +1,85 @@
+---
+title: "Trabalho 1"
+author: "Caio Gomes Alves"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Distribuição 1:
+
+A função densidade de probabilidade proposta é:
+
+$$f(x) = \frac{1}{2}\sin(x); 0 < x < \pi$$
+
+Para obtermos a função de probabilidade acumulada, iremos calcular a seguinte integral:
+
+$$
+F(x) = \int_{0}^{x}f(x) \text{d}x = \int_{0}^{x}\frac{1}{2}\sin(x)\text{d}x
+$$
+$$
+F(x) = \frac{1 - \cos(x)}{2}; 0 < x < \pi
+$$
+Agora, para gerar números aleatórios, iremos inverter a função de probabilidade acumulada:
+
+$$
+F^{-1}(x): u = \frac{1-\cos(x)}{2} \to \cos(x)=1-2u
+$$
+
+$$
+x = \arccos(1-2u); u \sim U(0,1)
+$$
+
+```{r, warning=FALSE}
+# Implementação das funções de Probabilidade:
+
+# Densidade de probabilidade:
+
+f1_dens <- function(x){
+  return(0.5 * sin(x))
+}
+
+## Função de probabilidade acumulada:
+
+f1_acum <- function(x){
+  F_1 <- (1 - cos(x))/2
+  return(F_1)
+}
+
+## Função densidade inversa:
+
+f1_inv <- function(n){
+  u <- runif(n)
+  x <- acos(1 - 2 * u)
+  return(x)
+}
+
+# Gráficos das funções de probabilidade:
+ggplot()+
+  xlim(0,pi)+
+  geom_function(fun = function(x)f1_dens(x), colour = "black")+
+  labs(x = "x", y = "f(x)")
+
+# Gráfico da acumulada empírica:
+
+## Mantendo uma seed para reprodutibilidade:
+set.seed(5050)
+
+## Geração de uma amostra de tamanho 10.000:
+amostra_1 <- f1_inv(10000)
+
+comp_1 <- as_tibble(amostra_1) %>% 
+  ggplot(aes(x = value))+
+    stat_ecdf(aes(color = "Empírica"))+
+    geom_function(fun = function(x)f1_acum(x), aes(color = "Teórica"))+
+    scale_colour_manual(values = c("#000000","#FF1100"))+
+    labs(x = "x", y = "Probabilidade Acumulada", color = "Acumuladas")
+
+comp_1
+  ```
+
